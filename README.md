@@ -2,7 +2,7 @@
 
 A lean CRM for real estate agents and managers, built for teams in the UAE and Pakistan. It manages leads, logs calls made through the phone's native dialer, tracks follow-ups, stores call recordings with AI assessment, and shows a manager dashboard.
 
-> Status: early development. The first milestone is a working MVP with authentication, lead management, call logging, follow-ups, recordings, AI assessment, and a dashboard.
+> Status: Day 1 of the MVP plan is in progress. Authentication, roles, and the app shell are in place. Lead management and the rest of the MVP are next.
 
 ## Features (MVP)
 
@@ -39,19 +39,53 @@ Audio files are never stored in MongoDB. Only their metadata and storage keys ar
 
 ## Getting started
 
-Setup instructions will be added once the Day 1 foundation (project structure, database connection, and authentication) is in place.
+Requirements: Node.js 20 or later, and a MongoDB database (MongoDB Atlas free tier is enough for development).
+
+### 1. Backend
 
 ```bash
-# Planned
-git clone https://github.com/aziz007/CRM.git
-cd CRM
+cd backend
+npm install
+cp .env.example .env     # then fill in MONGODB_URI and JWT_SECRET
+npm run dev              # API on http://localhost:4000
 ```
 
-Environment variables will be documented in `.env.example`. Do not commit real secrets.
+Generate a JWT secret with:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+```
+
+Create the first admin account (values come from your `.env` or the shell):
+
+```bash
+ADMIN_EMAIL=you@example.com ADMIN_PASSWORD='use-a-long-password' ADMIN_NAME='Your Name' ADMIN_COUNTRY=AE \
+  node src/utils/createAdmin.js
+```
+
+Run tests with `npm test`.
+
+### 2. Frontend
+
+```bash
+cd frontend
+npm install
+npm start                # http://localhost:4200
+```
+
+Sign in with the admin account you created.
+
+### API so far
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/health` | Health check |
+| POST | `/api/v1/auth/login` | Sign in, returns a JWT |
+| GET | `/api/v1/auth/me` | Current user (requires `Authorization: Bearer <token>`) |
 
 ## Project roadmap
 
-1. Project setup and authentication
+1. Project setup and authentication (in progress)
 2. Lead management
 3. Calling and call records
 4. Follow-ups and tasks

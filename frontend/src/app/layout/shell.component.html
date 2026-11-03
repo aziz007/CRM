@@ -1,0 +1,21 @@
+<mat-toolbar color="primary" class="toolbar">
+  <span class="brand">Real Estate CRM</span>
+
+  <nav class="nav">
+    <a mat-button routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Dashboard</a>
+    @if (auth.isAdmin()) {
+      <a mat-button routerLink="/admin" routerLinkActive="active">Admin</a>
+    }
+  </nav>
+
+  <span class="spacer"></span>
+
+  @if (auth.currentUser(); as user) {
+    <span class="user">{{ user.name }} ({{ user.role }})</span>
+  }
+  <button mat-button type="button" (click)="logout()">Sign out</button>
+</mat-toolbar>
+
+<main class="content">
+  <router-outlet />
+</main>
