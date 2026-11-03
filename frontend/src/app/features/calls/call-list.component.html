@@ -1,0 +1,119 @@
+<div class="header">
+  <h1>Calls</h1>
+  <div class="filters">
+    <mat-form-field appearance="outline">
+      <mat-label>Status</mat-label>
+      <mat-select [(ngModel)]="status" (selectionChange)="onFilterChange()">
+        <mat-option value="">All</mat-option>
+        <mat-option value="pending">Needs outcome</mat-option>
+        <mat-option value="logged">Logged</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Verification</mat-label>
+      <mat-select [(ngModel)]="verification" (selectionChange)="onFilterChange()">
+        <mat-option value="">All</mat-option>
+        <mat-option value="verified">Verified by call log</mat-option>
+        <mat-option value="unverified">Not verified</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+</div>
+
+<mat-card>
+  @if (data(); as page) {
+    @if (page.items.length === 0 && !loading()) {
+      <p class="empty">No calls match these filters.</p>
+    } @else {
+      <table mat-table [dataSource]="page.items" class="call-table">
+        <ng-container matColumnDef="when">
+          <th mat-header-cell *matHeaderCellDef>Started</th>
+          <td mat-cell *matCellDef="let call">{{ call.startedAt | date: 'short' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="lead">
+          <th mat-header-cell *matHeaderCellDef>Lead</th>
+          <td mat-cell *matCellDef="let call">
+            <a [routerLink]="['/leads', leadId(call)]">{{ leadName(call) || call.phone }}</a>
+            @if (auth.isAdmin()) {
+              <div class="muted small">{{ agentName(call) }}</div>
+            }
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="direction">
+          <th mat-header-cell *matHeaderCellDef>Direction</th>
+          <td mat-cell *matCellDef="let call">{{ call.direction }}</td>
+        </ng-container>
+        <ng-container matColumnDef="duration">
+          <th mat-header-cell *matHeaderCellDef>Duration</th>
+          <td mat-cell *matCellDef="let call">{{ call.durationSec ? formatMinutes(call.durationSec) : '—' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="outcome">
+          <th mat-header-cell *matHeaderCellDef>Outcome</th>
+          <td mat-cell *matCellDef="let call">
+            @if (call.status === 'pending') {
+              <span class="pill pending">Needs outcome</span>
+            } @else {
+              {{ call.outcome }}
+            }
+            @if (call.possibleDuplicate) {
+              <span class="pill warn">Possible duplicate</span>
+            }
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="verified">
+          <th mat-header-cell *matHeaderCellDef>Verified</th>
+          <td mat-cell *matCellDef="let call">
+            @if (call.verificationStatus === 'verified') {
+              <span class="pill ok">Yes</span>
+            } @else {
+              <span class="muted">No</span>
+            }
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let call">
+            @if (call.status === 'pending') {
+              <button mat-flat-button type="button" (click)="logOutcome(call)">Log outcome</button>
+            }
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columns"></tr>
+        <tr mat-row *matRowDef="let row; columns: columns"></tr>
+      </table>
+
+      <mat-paginator
+        [length]="page.total"
+        [pageIndex]="page.page - 1"
+        [pageSize]="page.limit"
+        [pageSizeOptions]="[10, 20, 50]"
+        (page)="onPage($event)"
+        showFirstLastButtons
+      />
+    }
+  } @else {
+    <p class="empty">Loading…</p>
+  }
+</mat-card>
+
+<mat-card class="import">
+  <mat-card-header><mat-card-title>Import from phone call log</mat-card-title></mat-card-header>
+  <mat-card-content>
+    <p class="muted">
+      Paste one call per line as <code>phone,startedAt,durationSec[,direction]</code>.
+      Matching calls to your leads are marked as verified. Calls to numbers that are not in your leads are skipped.
+    </p>
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Call log lines</mat-label>
+      <textarea matInput rows="4" [(ngModel)]="importText" placeholder="+971501234567,2026-11-03T10:15:00+04:00,240,outbound"></textarea>
+    </mat-form-field>
+    <button mat-stroked-button type="button" (click)="runImport()" [disabled]="!importText.trim()">Import</button>
+    @if (importResult(); as r) {
+      <p class="result">
+        Received {{ r.received }}: {{ r.verified }} verified, {{ r.created }} added,
+        {{ r.skippedUnknownNumber }} skipped (number not in your leads), {{ r.skippedInvalid }} invalid.
+      </p>
+    }
+  </mat-card-content>
+</mat-card>

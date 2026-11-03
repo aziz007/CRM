@@ -86,3 +86,15 @@ dl {
     white-space: pre-wrap;
   }
 }
+
+.pending-banner {
+  background: #fef7e0;
+
+  mat-card-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding-top: 16px;
+  }
+}

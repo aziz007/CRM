@@ -2,7 +2,7 @@
 
 A lean CRM for real estate agents and managers, built for teams in the UAE and Pakistan. It manages leads, logs calls made through the phone's native dialer, tracks follow-ups, stores call recordings with AI assessment, and shows a manager dashboard.
 
-> Status: Days 1 and 2 of the MVP plan are complete: authentication, roles, the app shell, and lead management. Calling, follow-ups, recordings, and the dashboard are next.
+> Status: Days 1 to 3 of the MVP plan are complete: authentication, roles, the app shell, lead management, and calling. Follow-ups, recordings, and the dashboard are next.
 
 ## Features (MVP)
 
@@ -13,6 +13,12 @@ A lean CRM for real estate agents and managers, built for teams in the UAE and P
 - AI assessment: transcript, outcome classification, summary, qualification, and recommended next action
 - Manager dashboard: calls logged, recordings pending, qualified leads, appointments, overdue tasks, and agent activity
 - Role-based access: Admin and Agent roles
+
+## Calling workflow
+
+1. Agent taps **Call** on a lead. The app records a pending call and opens the phone's dialer.
+2. After the call, the agent logs the outcome, duration and notes (**Log outcome**).
+3. Optionally, the agent pastes the phone's call log into **Calls → Import**. Matching calls are marked verified, which lets managers see which logged calls the device confirms.
 
 ## Important limitation
 
@@ -90,6 +96,11 @@ Sign in with the admin account you created.
 | GET | `/api/v1/leads/:id/activities` | Activity history for a lead |
 | POST | `/api/v1/leads/:id/activities` | Add a note to a lead |
 | GET | `/api/v1/users` | Active users for assignment (admin sees contact details) |
+| GET | `/api/v1/calls` | List calls, filtered by status, verification, lead or agent |
+| POST | `/api/v1/calls/start` | Start click-to-call: records a pending call and returns the number to dial |
+| POST | `/api/v1/calls` | Log a call manually; calls close in time to an earlier one are flagged as possible duplicates |
+| PATCH | `/api/v1/calls/:id` | Log or correct the outcome, duration and notes |
+| POST | `/api/v1/calls/import` | Import phone call-log entries; matches them to the agent's leads and marks them verified |
 
 Agents only see and change leads assigned to them. Admins see all leads and can reassign them.
 
@@ -97,7 +108,7 @@ Agents only see and change leads assigned to them. Admins see all leads and can 
 
 1. Project setup and authentication (complete)
 2. Lead management (complete)
-3. Calling and call records
+3. Calling and call records (complete)
 4. Follow-ups and tasks
 5. Recording upload and AI assessment
 6. Dashboard and agent performance

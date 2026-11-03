@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -8,13 +7,18 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { DatePipe } from '@angular/common';
+import { CallService } from '../../core/call.service';
+import { Call } from '../../core/call.models';
+import { CallLogDialogComponent, CallLogDialogData } from '../calls/call-log-dialog.component';
 import { AuthService } from '../../core/auth.service';
 import { Activity, AssignableUser, Lead, LEAD_STATUSES, LeadStatus, assigneeName } from '../../core/lead.models';
 import { LeadService } from '../../core/lead.service';
 
 @Component({
   selector: 'app-lead-detail',
-  imports: [DatePipe, ReactiveFormsModule, RouterLink, MatButtonModule, MatCardModule, MatFormFieldModule, MatInputModule, MatSelectModule],
+  imports: [DatePipe, MatDialogModule, ReactiveFormsModule, RouterLink, MatButtonModule, MatCardModule, MatFormFieldModule, MatInputModule, MatSelectModule],
   templateUrl: './lead-detail.component.html',
   styleUrl: './lead-detail.component.scss',
 })
@@ -23,9 +27,13 @@ export class LeadDetailComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly leads = inject(LeadService);
   private readonly snack = inject(MatSnackBar);
+  private readonly calls = inject(CallService);
+  private readonly dialog = inject(MatDialog);
   readonly auth = inject(AuthService);
 
   readonly statuses = LEAD_STATUSES;
+  readonly pendingCall = signal<Call | null>(null);
+  readonly callHistory = signal<Call[]>([]);
   readonly lead = signal<Lead | null>(null);
   readonly activities = signal<Activity[]>([]);
   readonly users = signal<AssignableUser[]>([]);
@@ -60,6 +68,48 @@ export class LeadDetailComponent implements OnInit {
     this.leads.activities(this.id).subscribe({
       next: (res) => this.activities.set(res.items),
     });
+    this.loadCalls();
+  }
+
+  private loadCalls(): void {
+    this.calls.list({ lead: this.id, limit: 50 }).subscribe({
+      next: (page) => {
+        this.callHistory.set(page.items);
+        const pending = page.items.find((c) => c.status === 'pending');
+        this.pendingCall.set(pending ?? null);
+      },
+    });
+  }
+
+  /** Starts a call through the phone's dialer and records it as pending until the outcome is logged. */
+  callLead(): void {
+    this.busy.set(true);
+    this.calls.start(this.id).subscribe({
+      next: ({ call, dialNumber }) => {
+        this.busy.set(false);
+        this.pendingCall.set(call);
+        this.loadCalls();
+        window.location.href = `tel:${dialNumber}`;
+      },
+      error: () => this.fail('Could not start the call. Please try again.'),
+    });
+  }
+
+  logCall(pending: Call | null): void {
+    const lead = this.lead();
+    const data: CallLogDialogData = pending
+      ? { pendingCall: pending, leadName: `${lead?.firstName ?? ''} ${lead?.lastName ?? ''}`.trim() }
+      : { leadId: this.id, leadName: `${lead?.firstName ?? ''} ${lead?.lastName ?? ''}`.trim() };
+    this.dialog
+      .open(CallLogDialogComponent, { data, width: '480px' })
+      .afterClosed()
+      .subscribe((saved) => {
+        if (saved) {
+          this.snack.open('Call saved', 'Close', { duration: 2500 });
+          this.loadCalls();
+          this.reloadActivities();
+        }
+      });
   }
 
   changeStatus(status: LeadStatus): void {

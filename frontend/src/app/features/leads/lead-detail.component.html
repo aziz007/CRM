@@ -8,6 +8,8 @@
       <p class="muted">{{ lead.phone }} · {{ lead.country === 'AE' ? 'UAE' : 'Pakistan' }}</p>
     </div>
     <div class="actions">
+      <button mat-flat-button type="button" (click)="callLead()" [disabled]="busy()">Call</button>
+      <button mat-stroked-button type="button" (click)="logCall(null)">Log call</button>
       @if (canEdit()) {
         <a mat-stroked-button [routerLink]="['/leads', lead.id, 'edit']">Edit</a>
       }
@@ -19,6 +21,16 @@
 
   <div class="layout">
     <div class="main">
+      @if (pendingCall(); as pending) {
+        <mat-card class="pending-banner">
+          <mat-card-content>
+            <strong>Call in progress or finished?</strong>
+            <span class="muted"> Log the outcome so this call is recorded.</span>
+            <button mat-flat-button type="button" (click)="logCall(pending)">Log outcome</button>
+          </mat-card-content>
+        </mat-card>
+      }
+
       <mat-card>
         <mat-card-header><mat-card-title>Details</mat-card-title></mat-card-header>
         <mat-card-content>
@@ -40,6 +52,27 @@
             <h3>Notes</h3>
             <p class="notes">{{ lead.notes }}</p>
           }
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card>
+        <mat-card-header><mat-card-title>Calls</mat-card-title></mat-card-header>
+        <mat-card-content>
+          <ul class="timeline">
+            @for (c of callHistory(); track c.id) {
+              <li>
+                <div class="when">{{ c.startedAt | date: 'medium' }} · {{ c.direction }}</div>
+                <div>
+                  @if (c.status === 'pending') { <em>Outcome not logged</em> } @else { {{ c.outcome }} }
+                  @if (c.durationSec) { · {{ (c.durationSec / 60).toFixed(1) }} min }
+                  @if (c.verificationStatus === 'verified') { · verified }
+                  @if (c.possibleDuplicate) { · possible duplicate }
+                </div>
+              </li>
+            } @empty {
+              <li class="muted">No calls yet.</li>
+            }
+          </ul>
         </mat-card-content>
       </mat-card>
 

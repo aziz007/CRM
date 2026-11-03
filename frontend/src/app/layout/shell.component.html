@@ -4,6 +4,7 @@
   <nav class="nav">
     <a mat-button routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Dashboard</a>
     <a mat-button routerLink="/leads" routerLinkActive="active">Leads</a>
+    <a mat-button routerLink="/calls" routerLinkActive="active">Calls</a>
     @if (auth.isAdmin()) {
       <a mat-button routerLink="/admin" routerLinkActive="active">Admin</a>
     }
