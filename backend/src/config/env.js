@@ -18,6 +18,13 @@ function loadEnv() {
     jwtSecret: process.env.JWT_SECRET,
     jwtExpiresIn: process.env.JWT_EXPIRES_IN || '12h',
     corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:4200',
+    storage: {
+      endpoint: process.env.B2_ENDPOINT || '',
+      region: process.env.B2_REGION || '',
+      bucket: process.env.B2_BUCKET || '',
+      keyId: process.env.B2_KEY_ID || '',
+      applicationKey: process.env.B2_APPLICATION_KEY || '',
+    },
   };
 }
 

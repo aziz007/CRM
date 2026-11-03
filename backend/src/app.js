@@ -8,8 +8,11 @@ const { createLeadsRouter } = require('./routes/leads');
 const { createUsersRouter } = require('./routes/users');
 const { createCallsRouter } = require('./routes/calls');
 const { createTasksRouter } = require('./routes/tasks');
+const { createRecordingsRouter } = require('./routes/recordings');
+const { createStorage } = require('./services/storage');
 
-function createApp(config) {
+function createApp(config, deps = {}) {
+  const storage = deps.storage || createStorage(config.storage || {});
   const app = express();
   const { requireAuth, requireRole } = createAuthMiddleware(config.jwtSecret);
 
@@ -28,8 +31,9 @@ function createApp(config) {
   api.use('/leads', createLeadsRouter({ requireAuth, requireRole }));
   api.use('/calls', createCallsRouter({ requireAuth }));
   api.use('/tasks', createTasksRouter({ requireAuth }));
+  api.use('/recordings', createRecordingsRouter({ requireAuth, storage }));
 
-  // Future routes (recordings, dashboard) mount here.
+  // Future routes (AI assessment, dashboard) mount here.
   app.use('/api/v1', api);
 
   app.locals.requireRole = requireRole;

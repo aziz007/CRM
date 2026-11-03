@@ -2,7 +2,7 @@
 
 A lean CRM for real estate agents and managers, built for teams in the UAE and Pakistan. It manages leads, logs calls made through the phone's native dialer, tracks follow-ups, stores call recordings with AI assessment, and shows a manager dashboard.
 
-> Status: Days 1 to 4 of the MVP plan are complete: authentication, roles, the app shell, lead management, calling, and follow-up tasks. Recordings and the manager dashboard are next.
+> Status: Days 1 to 4 of the MVP plan are complete. Day 5 is in progress: the recording storage backend is in place, and the upload screen and AI assessment are next.
 
 ## Features (MVP)
 
@@ -19,6 +19,25 @@ A lean CRM for real estate agents and managers, built for teams in the UAE and P
 1. Agent taps **Call** on a lead. The app records a pending call and opens the phone's dialer.
 2. After the call, the agent logs the outcome, duration and notes (**Log outcome**).
 3. Optionally, the agent pastes the phone's call log into **Calls → Import**. Matching calls are marked verified, which lets managers see which logged calls the device confirms.
+
+## Call recordings
+
+Recordings are stored in a private Backblaze B2 bucket through its S3-compatible API. The database keeps only metadata. Audio never passes through the database.
+
+Upload flow:
+
+1. The agent requests an upload. The server checks the call, the file type and size, and that consent was confirmed. It then returns a signed upload link that expires after 10 minutes.
+2. The app uploads the file directly to B2 with that link.
+3. The app confirms the upload. The server checks that the file size and type match what was declared.
+4. Downloads use a separate signed link that expires after 5 minutes.
+
+Set up B2:
+
+1. Create a B2 account and a bucket. Keep the bucket **Private**.
+2. Create an application key limited to that bucket.
+3. Copy the endpoint, region, bucket name, key ID and application key into `backend/.env`. See `backend/.env.example`.
+
+Storage keys are generated on the server, so uploaded file names cannot change where a file is stored.
 
 ## Follow-ups
 
@@ -41,7 +60,7 @@ Before going live, confirm your obligations under UAE PDPL and Pakistan's data p
 | Frontend | Angular, Angular Material |
 | Backend | Node.js, Express, JWT authentication |
 | Database | MongoDB (Atlas) |
-| Recording storage | Private object storage (provider to be selected) |
+| Recording storage | Backblaze B2, private bucket via S3-compatible API |
 | Transcription | AssemblyAI (planned) |
 | AI assessment | Claude via the Anthropic API (planned) |
 
@@ -105,6 +124,11 @@ Sign in with the admin account you created.
 | POST | `/api/v1/calls` | Log a call manually; calls close in time to an earlier one are flagged as possible duplicates |
 | PATCH | `/api/v1/calls/:id` | Log or correct the outcome, duration and notes |
 | POST | `/api/v1/calls/import` | Import phone call-log entries; matches them to the agent's leads and marks them verified |
+| POST | `/api/v1/recordings/upload-url` | Start an upload. Requires consent to be confirmed. Returns a 10-minute signed upload link |
+| POST | `/api/v1/recordings/:id/complete` | Confirm the upload arrived with the declared size and type |
+| GET | `/api/v1/recordings?callId=` | List recordings for a call |
+| GET | `/api/v1/recordings/:id` | Recording metadata |
+| GET | `/api/v1/recordings/:id/download` | 5-minute signed download link |
 | GET | `/api/v1/tasks` | List tasks by bucket (overdue, today, upcoming), status, lead or assignee |
 | GET | `/api/v1/tasks/summary` | Counts of overdue, due-today and due-in-7-days tasks for the dashboard |
 | POST | `/api/v1/tasks` | Create a follow-up task, optionally linked to a lead |
