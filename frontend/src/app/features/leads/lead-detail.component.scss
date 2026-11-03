@@ -98,3 +98,17 @@ dl {
     padding-top: 16px;
   }
 }
+
+.card-actions {
+  margin-left: auto;
+}
+
+.task-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  > div {
+    flex: 1;
+  }
+}

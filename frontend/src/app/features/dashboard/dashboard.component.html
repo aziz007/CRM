@@ -1,17 +1,58 @@
 <h1>Welcome, {{ auth.currentUser()?.name }}</h1>
-<p class="muted">Your leads, follow-ups and call activity will appear here once the lead and calling features are in place.</p>
 
 <div class="grid">
-  <mat-card>
-    <mat-card-header><mat-card-title>Today's follow-ups</mat-card-title></mat-card-header>
-    <mat-card-content><p class="muted">Coming in Day 4.</p></mat-card-content>
+  <mat-card class="stat" [class.alert]="(summary()?.overdue ?? 0) > 0">
+    <mat-card-content>
+      <div class="value">{{ summary()?.overdue ?? '—' }}</div>
+      <div class="label">Overdue tasks</div>
+    </mat-card-content>
   </mat-card>
+  <mat-card class="stat">
+    <mat-card-content>
+      <div class="value">{{ summary()?.today ?? '—' }}</div>
+      <div class="label">Due today</div>
+    </mat-card-content>
+  </mat-card>
+  <mat-card class="stat">
+    <mat-card-content>
+      <div class="value">{{ summary()?.upcoming ?? '—' }}</div>
+      <div class="label">Due in the next 7 days</div>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<mat-card class="reminders">
+  <mat-card-header>
+    <mat-card-title>Reminders</mat-card-title>
+    <mat-card-subtitle><a routerLink="/tasks">All tasks</a></mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    <ul>
+      @for (task of dueList(); track task.id) {
+        <li>
+          <input type="checkbox" (change)="complete(task)" aria-label="Mark complete" />
+          <div class="text">
+            <span>{{ task.title }}</span>
+            <span class="muted small">
+              {{ task.dueAt | date: 'EEE h:mm a' }}
+              @if (leadName(task)) { · {{ leadName(task) }} }
+            </span>
+          </div>
+        </li>
+      } @empty {
+        <li class="muted">No overdue or due-today tasks.</li>
+      }
+    </ul>
+  </mat-card-content>
+</mat-card>
+
+<div class="grid links">
   <mat-card>
     <mat-card-header><mat-card-title>Leads</mat-card-title></mat-card-header>
     <mat-card-content><p><a routerLink="/leads">Open the lead list</a></p></mat-card-content>
   </mat-card>
   <mat-card>
     <mat-card-header><mat-card-title>Calls</mat-card-title></mat-card-header>
-    <mat-card-content><p class="muted">Coming in Day 3.</p></mat-card-content>
+    <mat-card-content><p><a routerLink="/calls">Open the call log</a></p></mat-card-content>
   </mat-card>
 </div>

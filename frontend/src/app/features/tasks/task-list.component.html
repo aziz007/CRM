@@ -1,0 +1,82 @@
+<div class="header">
+  <h1>Tasks</h1>
+  <button mat-flat-button type="button" (click)="edit()">New task</button>
+</div>
+
+<nav class="buckets" aria-label="Task filters">
+  @for (b of buckets; track b.value) {
+    <button mat-button type="button" [class.active]="bucket === b.value" (click)="setBucket(b.value)">{{ b.label }}</button>
+  }
+</nav>
+
+<mat-card>
+  @if (data(); as page) {
+    @if (page.items.length === 0 && !loading()) {
+      <p class="empty">Nothing here. Good work.</p>
+    } @else {
+      <table mat-table [dataSource]="page.items" class="task-table">
+        <ng-container matColumnDef="done">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let task">
+            <input type="checkbox" [checked]="task.status === 'done'" (change)="toggleDone(task)" aria-label="Mark complete" />
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="title">
+          <th mat-header-cell *matHeaderCellDef>Task</th>
+          <td mat-cell *matCellDef="let task">
+            <span [class.done]="task.status === 'done'">{{ task.title }}</span>
+            @if (auth.isAdmin()) {
+              <div class="muted small">{{ assigneeName(task) }}</div>
+            }
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="lead">
+          <th mat-header-cell *matHeaderCellDef>Lead</th>
+          <td mat-cell *matCellDef="let task">
+            @if (leadId(task); as id) {
+              <a [routerLink]="['/leads', id]">{{ leadName(task) || 'Open lead' }}</a>
+            } @else {
+              <span class="muted">—</span>
+            }
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="due">
+          <th mat-header-cell *matHeaderCellDef>Due</th>
+          <td mat-cell *matCellDef="let task">
+            <span [class.overdue]="isOverdue(task)">{{ task.dueAt | date: 'EEE d MMM, h:mm a' }}</span>
+            @if (isOverdue(task)) { <span class="pill warn">Overdue</span> }
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="priority">
+          <th mat-header-cell *matHeaderCellDef>Priority</th>
+          <td mat-cell *matCellDef="let task">
+            @if (task.priority === 'high') { <span class="pill high">High</span> } @else { {{ task.priority }} }
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let task" class="row-actions">
+            <button mat-button type="button" (click)="edit(task)">Edit</button>
+            @if (auth.isAdmin()) {
+              <button mat-button type="button" color="warn" (click)="remove(task)">Delete</button>
+            }
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columns"></tr>
+        <tr mat-row *matRowDef="let row; columns: columns"></tr>
+      </table>
+
+      <mat-paginator
+        [length]="page.total"
+        [pageIndex]="page.page - 1"
+        [pageSize]="page.limit"
+        [pageSizeOptions]="[10, 20, 50]"
+        (page)="onPage($event)"
+        showFirstLastButtons
+      />
+    }
+  } @else {
+    <p class="empty">Loading…</p>
+  }
+</mat-card>

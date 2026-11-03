@@ -7,6 +7,7 @@ const { createAuthRouter } = require('./routes/auth');
 const { createLeadsRouter } = require('./routes/leads');
 const { createUsersRouter } = require('./routes/users');
 const { createCallsRouter } = require('./routes/calls');
+const { createTasksRouter } = require('./routes/tasks');
 
 function createApp(config) {
   const app = express();
@@ -26,8 +27,9 @@ function createApp(config) {
   api.use('/users', createUsersRouter({ requireAuth, requireRole }));
   api.use('/leads', createLeadsRouter({ requireAuth, requireRole }));
   api.use('/calls', createCallsRouter({ requireAuth }));
+  api.use('/tasks', createTasksRouter({ requireAuth }));
 
-  // Future routes (tasks, recordings, dashboard) mount here.
+  // Future routes (recordings, dashboard) mount here.
   app.use('/api/v1', api);
 
   app.locals.requireRole = requireRole;

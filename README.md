@@ -2,7 +2,7 @@
 
 A lean CRM for real estate agents and managers, built for teams in the UAE and Pakistan. It manages leads, logs calls made through the phone's native dialer, tracks follow-ups, stores call recordings with AI assessment, and shows a manager dashboard.
 
-> Status: Days 1 to 3 of the MVP plan are complete: authentication, roles, the app shell, lead management, and calling. Follow-ups, recordings, and the dashboard are next.
+> Status: Days 1 to 4 of the MVP plan are complete: authentication, roles, the app shell, lead management, calling, and follow-up tasks. Recordings and the manager dashboard are next.
 
 ## Features (MVP)
 
@@ -19,6 +19,10 @@ A lean CRM for real estate agents and managers, built for teams in the UAE and P
 1. Agent taps **Call** on a lead. The app records a pending call and opens the phone's dialer.
 2. After the call, the agent logs the outcome, duration and notes (**Log outcome**).
 3. Optionally, the agent pastes the phone's call log into **Calls → Import**. Matching calls are marked verified, which lets managers see which logged calls the device confirms.
+
+## Follow-ups
+
+Tasks have a due date and time, an optional lead, and an assignee. The dashboard shows overdue and due-today counts. Due dates are computed in the user's own timezone, so "today" matches the clock on their device. Completing a lead's task is recorded in the lead's activity history.
 
 ## Important limitation
 
@@ -101,6 +105,11 @@ Sign in with the admin account you created.
 | POST | `/api/v1/calls` | Log a call manually; calls close in time to an earlier one are flagged as possible duplicates |
 | PATCH | `/api/v1/calls/:id` | Log or correct the outcome, duration and notes |
 | POST | `/api/v1/calls/import` | Import phone call-log entries; matches them to the agent's leads and marks them verified |
+| GET | `/api/v1/tasks` | List tasks by bucket (overdue, today, upcoming), status, lead or assignee |
+| GET | `/api/v1/tasks/summary` | Counts of overdue, due-today and due-in-7-days tasks for the dashboard |
+| POST | `/api/v1/tasks` | Create a follow-up task, optionally linked to a lead |
+| PATCH | `/api/v1/tasks/:id` | Edit a task, or mark it done, open or cancelled |
+| DELETE | `/api/v1/tasks/:id` | Delete a task (admin only) |
 
 Agents only see and change leads assigned to them. Admins see all leads and can reassign them.
 
@@ -109,7 +118,7 @@ Agents only see and change leads assigned to them. Admins see all leads and can 
 1. Project setup and authentication (complete)
 2. Lead management (complete)
 3. Calling and call records (complete)
-4. Follow-ups and tasks
+4. Follow-ups and tasks (complete)
 5. Recording upload and AI assessment
 6. Dashboard and agent performance
 7. Testing, deployment, and handover

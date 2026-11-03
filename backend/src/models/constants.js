@@ -4,7 +4,9 @@ const PROPERTY_TYPES = ['Apartment', 'Villa', 'Townhouse', 'Penthouse', 'Plot', 
 const PURPOSES = ['Buy', 'Rent', 'Sell', 'Invest'];
 const COUNTRIES = ['AE', 'PK'];
 const CURRENCIES = ['AED', 'PKR', 'USD'];
-const ACTIVITY_TYPES = ['created', 'updated', 'status_changed', 'assigned', 'note', 'call'];
+const ACTIVITY_TYPES = ['created', 'updated', 'status_changed', 'assigned', 'note', 'call', 'task'];
+const TASK_STATUSES = ['open', 'done', 'cancelled'];
+const TASK_PRIORITIES = ['low', 'normal', 'high'];
 const CALL_OUTCOMES = [
   'No Answer', 'Busy', 'Voicemail', 'Wrong Number', 'Not Interested',
   'Callback Requested', 'Interested', 'Appointment Set', 'Other',
@@ -23,4 +25,6 @@ module.exports = {
   APPOINTMENT_STATUSES,
   CALL_OUTCOMES,
   CALL_DIRECTIONS,
+  TASK_STATUSES,
+  TASK_PRIORITIES,
 };

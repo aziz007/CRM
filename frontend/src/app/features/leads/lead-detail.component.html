@@ -56,6 +56,29 @@
       </mat-card>
 
       <mat-card>
+        <mat-card-header>
+          <mat-card-title>Tasks</mat-card-title>
+          <div class="card-actions"><button mat-stroked-button type="button" (click)="addTask()">Add task</button></div>
+        </mat-card-header>
+        <mat-card-content>
+          <ul class="timeline">
+            @for (t of openTasks(); track t.id) {
+              <li class="task-row">
+                <input type="checkbox" (change)="completeTask(t)" aria-label="Mark complete" />
+                <div>
+                  <div>{{ t.title }}</div>
+                  <div class="when">Due {{ t.dueAt | date: 'EEE d MMM, h:mm a' }}</div>
+                </div>
+                <button mat-button type="button" (click)="addTask(t)">Edit</button>
+              </li>
+            } @empty {
+              <li class="muted">No open tasks for this lead.</li>
+            }
+          </ul>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card>
         <mat-card-header><mat-card-title>Calls</mat-card-title></mat-card-header>
         <mat-card-content>
           <ul class="timeline">

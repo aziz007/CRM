@@ -1,0 +1,61 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.buckets {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+
+  button.active {
+    background: #e8f0fe;
+    font-weight: 600;
+  }
+}
+
+.task-table {
+  width: 100%;
+}
+
+.muted {
+  color: #5f6368;
+}
+
+.small {
+  font-size: 12px;
+}
+
+.empty {
+  padding: 24px 16px;
+  color: #5f6368;
+}
+
+.done {
+  text-decoration: line-through;
+  color: #80868b;
+}
+
+.overdue {
+  color: #b3261e;
+  font-weight: 500;
+}
+
+.pill {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  background: #e8eaed;
+
+  &.warn { background: #fce8e6; color: #b3261e; }
+  &.high { background: #fce8e6; }
+}
+
+.row-actions {
+  white-space: nowrap;
+}

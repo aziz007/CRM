@@ -12,6 +12,9 @@ import { DatePipe } from '@angular/common';
 import { CallService } from '../../core/call.service';
 import { Call } from '../../core/call.models';
 import { CallLogDialogComponent, CallLogDialogData } from '../calls/call-log-dialog.component';
+import { Task } from '../../core/task.models';
+import { TaskService } from '../../core/task.service';
+import { TaskDialogComponent, TaskDialogData } from '../tasks/task-dialog.component';
 import { AuthService } from '../../core/auth.service';
 import { Activity, AssignableUser, Lead, LEAD_STATUSES, LeadStatus, assigneeName } from '../../core/lead.models';
 import { LeadService } from '../../core/lead.service';
@@ -28,6 +31,8 @@ export class LeadDetailComponent implements OnInit {
   private readonly leads = inject(LeadService);
   private readonly snack = inject(MatSnackBar);
   private readonly calls = inject(CallService);
+  private readonly tasks = inject(TaskService);
+  readonly openTasks = signal<Task[]>([]);
   private readonly dialog = inject(MatDialog);
   readonly auth = inject(AuthService);
 
@@ -69,6 +74,39 @@ export class LeadDetailComponent implements OnInit {
       next: (res) => this.activities.set(res.items),
     });
     this.loadCalls();
+    this.loadTasks();
+  }
+
+  loadTasks(): void {
+    this.tasks.list({ lead: this.id, status: 'open', limit: 50 }).subscribe({
+      next: (page) => this.openTasks.set(page.items),
+    });
+  }
+
+  addTask(task?: Task): void {
+    const data: TaskDialogData = task
+      ? { task }
+      : { leadId: this.id, leadName: `${this.lead()?.firstName ?? ''} ${this.lead()?.lastName ?? ''}`.trim() };
+    this.dialog
+      .open(TaskDialogComponent, { data, width: '520px' })
+      .afterClosed()
+      .subscribe((saved) => {
+        if (saved) {
+          this.snack.open(task ? 'Task updated' : 'Task added', 'Close', { duration: 2500 });
+          this.loadTasks();
+          this.reloadActivities();
+        }
+      });
+  }
+
+  completeTask(task: Task): void {
+    this.tasks.update(task.id, { status: 'done' }).subscribe({
+      next: () => {
+        this.loadTasks();
+        this.reloadActivities();
+      },
+      error: () => this.fail('Could not update the task.'),
+    });
   }
 
   private loadCalls(): void {
