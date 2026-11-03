@@ -4,6 +4,8 @@ const cors = require('cors');
 const { createAuthMiddleware } = require('./middleware/auth');
 const { notFound, errorHandler } = require('./middleware/errors');
 const { createAuthRouter } = require('./routes/auth');
+const { createLeadsRouter } = require('./routes/leads');
+const { createUsersRouter } = require('./routes/users');
 
 function createApp(config) {
   const app = express();
@@ -20,7 +22,10 @@ function createApp(config) {
   const api = express.Router();
   api.use('/auth', createAuthRouter({ jwtSecret: config.jwtSecret, jwtExpiresIn: config.jwtExpiresIn, requireAuth }));
 
-  // Future routes (leads, calls, tasks, recordings, dashboard) mount here with requireAuth and requireRole.
+  api.use('/users', createUsersRouter({ requireAuth, requireRole }));
+  api.use('/leads', createLeadsRouter({ requireAuth, requireRole }));
+
+  // Future routes (calls, tasks, recordings, dashboard) mount here.
   app.use('/api/v1', api);
 
   app.locals.requireRole = requireRole;

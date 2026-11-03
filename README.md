@@ -2,7 +2,7 @@
 
 A lean CRM for real estate agents and managers, built for teams in the UAE and Pakistan. It manages leads, logs calls made through the phone's native dialer, tracks follow-ups, stores call recordings with AI assessment, and shows a manager dashboard.
 
-> Status: Day 1 of the MVP plan is in progress. Authentication, roles, and the app shell are in place. Lead management and the rest of the MVP are next.
+> Status: Days 1 and 2 of the MVP plan are complete: authentication, roles, the app shell, and lead management. Calling, follow-ups, recordings, and the dashboard are next.
 
 ## Features (MVP)
 
@@ -82,11 +82,21 @@ Sign in with the admin account you created.
 | GET | `/health` | Health check |
 | POST | `/api/v1/auth/login` | Sign in, returns a JWT |
 | GET | `/api/v1/auth/me` | Current user (requires `Authorization: Bearer <token>`) |
+| GET | `/api/v1/leads` | List leads with search, status, country, source, and paging filters |
+| POST | `/api/v1/leads` | Create a lead (duplicate phone in the same country is rejected) |
+| GET | `/api/v1/leads/:id` | Lead details |
+| PATCH | `/api/v1/leads/:id` | Update a lead; status and assignment changes are logged |
+| DELETE | `/api/v1/leads/:id` | Archive a lead (admin only) |
+| GET | `/api/v1/leads/:id/activities` | Activity history for a lead |
+| POST | `/api/v1/leads/:id/activities` | Add a note to a lead |
+| GET | `/api/v1/users` | Active users for assignment (admin sees contact details) |
+
+Agents only see and change leads assigned to them. Admins see all leads and can reassign them.
 
 ## Project roadmap
 
-1. Project setup and authentication (in progress)
-2. Lead management
+1. Project setup and authentication (complete)
+2. Lead management (complete)
 3. Calling and call records
 4. Follow-ups and tasks
 5. Recording upload and AI assessment

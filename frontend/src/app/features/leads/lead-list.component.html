@@ -1,0 +1,87 @@
+<div class="header">
+  <h1>Leads</h1>
+  <a mat-flat-button routerLink="/leads/new">New lead</a>
+</div>
+
+<mat-card>
+  <div class="filters">
+    <mat-form-field appearance="outline" class="search">
+      <mat-label>Search name, phone, email or area</mat-label>
+      <input matInput [formControl]="search" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Status</mat-label>
+      <mat-select [(ngModel)]="status" (selectionChange)="onFilterChange()">
+        <mat-option value="">All</mat-option>
+        @for (s of statuses; track s) {
+          <mat-option [value]="s">{{ s }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Country</mat-label>
+      <mat-select [(ngModel)]="country" (selectionChange)="onFilterChange()">
+        <mat-option value="">All</mat-option>
+        <mat-option value="AE">UAE</mat-option>
+        <mat-option value="PK">Pakistan</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  }
+
+  @if (data(); as page) {
+    @if (page.items.length === 0 && !loading()) {
+      <p class="empty">No leads match these filters.</p>
+    } @else {
+      <table mat-table [dataSource]="page.items" class="lead-table">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let lead">{{ lead.firstName }} {{ lead.lastName }}</td>
+        </ng-container>
+        <ng-container matColumnDef="phone">
+          <th mat-header-cell *matHeaderCellDef>Phone</th>
+          <td mat-cell *matCellDef="let lead">{{ lead.phone }}</td>
+        </ng-container>
+        <ng-container matColumnDef="location">
+          <th mat-header-cell *matHeaderCellDef>Area</th>
+          <td mat-cell *matCellDef="let lead">{{ lead.location || '—' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="budget">
+          <th mat-header-cell *matHeaderCellDef>Budget</th>
+          <td mat-cell *matCellDef="let lead">{{ budget(lead) || '—' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let lead"><span class="status">{{ lead.status }}</span></td>
+        </ng-container>
+        <ng-container matColumnDef="assignedTo">
+          <th mat-header-cell *matHeaderCellDef>Agent</th>
+          <td mat-cell *matCellDef="let lead">{{ assigneeName(lead) || '—' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="updated">
+          <th mat-header-cell *matHeaderCellDef>Updated</th>
+          <td mat-cell *matCellDef="let lead">{{ lead.updatedAt | date: 'mediumDate' }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columns"></tr>
+        <tr mat-row *matRowDef="let row; columns: columns" class="clickable" (click)="open(row)"></tr>
+      </table>
+
+      <mat-paginator
+        [length]="page.total"
+        [pageIndex]="page.page - 1"
+        [pageSize]="page.limit"
+        [pageSizeOptions]="[10, 20, 50, 100]"
+        (page)="onPage($event)"
+        showFirstLastButtons
+      />
+    }
+  } @else if (loading()) {
+    <p class="empty">Loading…</p>
+  }
+</mat-card>

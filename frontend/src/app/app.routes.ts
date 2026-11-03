@@ -3,6 +3,9 @@ import { authGuard, roleGuard } from './core/auth.guard';
 import { LoginComponent } from './features/login/login.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { ShellComponent } from './layout/shell.component';
+import { LeadListComponent } from './features/leads/lead-list.component';
+import { LeadFormComponent } from './features/leads/lead-form.component';
+import { LeadDetailComponent } from './features/leads/lead-detail.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -12,6 +15,10 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: '', component: DashboardComponent },
+      { path: 'leads', component: LeadListComponent },
+      { path: 'leads/new', component: LeadFormComponent },
+      { path: 'leads/:id', component: LeadDetailComponent },
+      { path: 'leads/:id/edit', component: LeadFormComponent },
       {
         path: 'admin',
         canActivate: [roleGuard],

@@ -1,0 +1,105 @@
+@if (notFound()) {
+  <h1>Lead not found</h1>
+  <p>This lead does not exist or is not assigned to you. <a routerLink="/leads">Back to leads</a></p>
+} @else if (lead(); as lead) {
+  <div class="header">
+    <div>
+      <h1>{{ lead.firstName }} {{ lead.lastName }}</h1>
+      <p class="muted">{{ lead.phone }} · {{ lead.country === 'AE' ? 'UAE' : 'Pakistan' }}</p>
+    </div>
+    <div class="actions">
+      @if (canEdit()) {
+        <a mat-stroked-button [routerLink]="['/leads', lead.id, 'edit']">Edit</a>
+      }
+      @if (auth.isAdmin()) {
+        <button mat-button type="button" color="warn" (click)="archive()">Archive</button>
+      }
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="main">
+      <mat-card>
+        <mat-card-header><mat-card-title>Details</mat-card-title></mat-card-header>
+        <mat-card-content>
+          <dl>
+            <dt>Email</dt><dd>{{ lead.email || '—' }}</dd>
+            <dt>Area</dt><dd>{{ lead.location || '—' }}</dd>
+            <dt>Purpose</dt><dd>{{ lead.purpose }} · {{ lead.propertyType }}</dd>
+            <dt>Budget</dt>
+            <dd>
+              @if (lead.budgetMin != null || lead.budgetMax != null) {
+                {{ lead.currency }} {{ lead.budgetMin ?? '—' }} – {{ lead.budgetMax ?? '—' }}
+              } @else { — }
+            </dd>
+            <dt>Source</dt><dd>{{ lead.source }}</dd>
+            <dt>Agent</dt><dd>{{ assigneeName(lead) || '—' }}</dd>
+            <dt>Created</dt><dd>{{ lead.createdAt | date: 'medium' }}</dd>
+          </dl>
+          @if (lead.notes) {
+            <h3>Notes</h3>
+            <p class="notes">{{ lead.notes }}</p>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card>
+        <mat-card-header><mat-card-title>Activity</mat-card-title></mat-card-header>
+        <mat-card-content>
+          <div class="note-form">
+            <mat-form-field appearance="outline" class="full">
+              <mat-label>Add a note</mat-label>
+              <textarea matInput rows="2" [formControl]="noteControl"></textarea>
+            </mat-form-field>
+            <button mat-flat-button type="button" (click)="addNote()" [disabled]="busy()">Add note</button>
+          </div>
+
+          <ul class="timeline">
+            @for (a of activities(); track a.id) {
+              <li>
+                <div class="when">{{ a.createdAt | date: 'medium' }} · {{ a.user?.name ?? 'System' }}</div>
+                <div [class.note]="a.type === 'note'">{{ a.summary }}</div>
+              </li>
+            } @empty {
+              <li class="muted">No activity yet.</li>
+            }
+          </ul>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <aside class="side">
+      <mat-card>
+        <mat-card-header><mat-card-title>Status</mat-card-title></mat-card-header>
+        <mat-card-content>
+          <mat-form-field appearance="outline" class="full">
+            <mat-label>Current status</mat-label>
+            <mat-select [value]="lead.status" (selectionChange)="changeStatus($event.value)" [disabled]="!canEdit() || busy()">
+              @for (s of statuses; track s) {
+                <mat-option [value]="s">{{ s }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </mat-card-content>
+      </mat-card>
+
+      @if (auth.isAdmin() && users().length) {
+        <mat-card>
+          <mat-card-header><mat-card-title>Reassign</mat-card-title></mat-card-header>
+          <mat-card-content>
+            <mat-form-field appearance="outline" class="full">
+              <mat-label>Agent</mat-label>
+              <mat-select [value]="assigneeIdOf(lead)" (selectionChange)="reassign($event.value)" [disabled]="busy()">
+                @for (u of users(); track u.id) {
+                  <mat-option [value]="u.id">{{ u.name }} ({{ u.role }})</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </mat-card-content>
+        </mat-card>
+      }
+    </aside>
+  </div>
+} @else {
+  <p class="muted">Loading…</p>
+}

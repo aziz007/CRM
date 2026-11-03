@@ -1,0 +1,140 @@
+<div class="header">
+  <h1>{{ editingId ? 'Edit lead' : 'New lead' }}</h1>
+  <a mat-button [routerLink]="editingId ? ['/leads', editingId] : ['/leads']">Cancel</a>
+</div>
+
+<mat-card>
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="grid">
+    <mat-form-field appearance="outline">
+      <mat-label>First name</mat-label>
+      <input matInput formControlName="firstName" />
+      @if (form.controls.firstName.touched && form.controls.firstName.invalid) {
+        <mat-error>First name is required.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Last name</mat-label>
+      <input matInput formControlName="lastName" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Phone (with country code)</mat-label>
+      <input matInput formControlName="phone" placeholder="+971 50 123 4567" />
+      <mat-hint>Include the country code, for example +971 or +92.</mat-hint>
+      @if (form.controls.phone.touched && form.controls.phone.invalid) {
+        <mat-error>Phone number is required.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Email</mat-label>
+      <input matInput type="email" formControlName="email" />
+      @if (form.controls.email.invalid) {
+        <mat-error>Enter a valid email address.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Country</mat-label>
+      <mat-select formControlName="country">
+        <mat-option value="AE">UAE</mat-option>
+        <mat-option value="PK">Pakistan</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Area / location</mat-label>
+      <input matInput formControlName="location" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Purpose</mat-label>
+      <mat-select formControlName="purpose">
+        @for (p of purposes; track p) {
+          <mat-option [value]="p">{{ p }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Property type</mat-label>
+      <mat-select formControlName="propertyType">
+        @for (t of propertyTypes; track t) {
+          <mat-option [value]="t">{{ t }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Currency</mat-label>
+      <mat-select formControlName="currency">
+        @for (c of currencies; track c) {
+          <mat-option [value]="c">{{ c }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Budget minimum</mat-label>
+      <input matInput type="number" min="0" formControlName="budgetMin" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Budget maximum</mat-label>
+      <input matInput type="number" min="0" formControlName="budgetMax" />
+      @if (form.hasError('budgetOrder')) {
+        <mat-error>Minimum cannot be greater than maximum.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Source</mat-label>
+      <mat-select formControlName="source">
+        @for (s of sources; track s) {
+          <mat-option [value]="s">{{ s }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Status</mat-label>
+      <mat-select formControlName="status">
+        @for (s of statuses; track s) {
+          <mat-option [value]="s">{{ s }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    @if (auth.isAdmin()) {
+      <mat-form-field appearance="outline">
+        <mat-label>Assigned agent</mat-label>
+        <mat-select formControlName="assignedTo">
+          @for (a of agents(); track a.id) {
+            <mat-option [value]="a.id">{{ a.name }} ({{ a.country }})</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Notes</mat-label>
+      <textarea matInput rows="4" formControlName="notes"></textarea>
+    </mat-form-field>
+
+    @if (error()) {
+      <p class="error full" role="alert">
+        {{ error() }}
+        @if (duplicateId()) {
+          <a [routerLink]="['/leads', duplicateId()]">Open existing lead</a>
+        }
+      </p>
+    }
+
+    <div class="actions full">
+      <button mat-flat-button type="submit" [disabled]="saving()">
+        {{ saving() ? 'Saving…' : editingId ? 'Save changes' : 'Create lead' }}
+      </button>
+    </div>
+  </form>
+</mat-card>
