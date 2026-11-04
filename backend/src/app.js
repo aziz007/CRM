@@ -9,6 +9,7 @@ const { createUsersRouter } = require('./routes/users');
 const { createCallsRouter } = require('./routes/calls');
 const { createTasksRouter } = require('./routes/tasks');
 const { createRecordingsRouter } = require('./routes/recordings');
+const { createAppointmentsRouter, createPropertiesRouter } = require('./routes/appointments');
 const { createStorage } = require('./services/storage');
 
 function createApp(config, deps = {}) {
@@ -32,6 +33,8 @@ function createApp(config, deps = {}) {
   api.use('/calls', createCallsRouter({ requireAuth }));
   api.use('/tasks', createTasksRouter({ requireAuth }));
   api.use('/recordings', createRecordingsRouter({ requireAuth, storage }));
+  api.use('/appointments', createAppointmentsRouter({ requireAuth }));
+  api.use('/properties', createPropertiesRouter({ requireAuth, requireRole }));
 
   // Future routes (AI assessment, dashboard) mount here.
   app.use('/api/v1', api);

@@ -75,6 +75,8 @@
           <td mat-cell *matCellDef="let call">
             @if (call.status === 'pending') {
               <button mat-flat-button type="button" (click)="logOutcome(call)">Log outcome</button>
+            } @else {
+              <button mat-stroked-button type="button" (click)="uploadRecording(call)">Upload recording</button>
             }
           </td>
         </ng-container>

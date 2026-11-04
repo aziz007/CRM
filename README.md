@@ -2,7 +2,7 @@
 
 A lean CRM for real estate agents and managers, built for teams in the UAE and Pakistan. It manages leads, logs calls made through the phone's native dialer, tracks follow-ups, stores call recordings with AI assessment, and shows a manager dashboard.
 
-> Status: Days 1 to 4 of the MVP plan are complete. Day 5 is in progress: the recording storage backend is in place, and the upload screen and AI assessment are next.
+> Status: Days 1 to 4 are complete. Day 5 is partly done: recording storage and the upload screen are in place. AI assessment is next. Appointment and property endpoints are available; their screens are not yet built.
 
 ## Features (MVP)
 
@@ -38,6 +38,8 @@ Set up B2:
 3. Copy the endpoint, region, bucket name, key ID and application key into `backend/.env`. See `backend/.env.example`.
 
 Storage keys are generated on the server, so uploaded file names cannot change where a file is stored.
+
+Browsers upload directly to B2, so the bucket needs a CORS rule. In the bucket settings, allow the app's origin (for example `http://localhost:4200` and your deployed site) with the `PUT`, `GET` and `HEAD` operations and all headers.
 
 ## Follow-ups
 
@@ -129,6 +131,12 @@ Sign in with the admin account you created.
 | GET | `/api/v1/recordings?callId=` | List recordings for a call |
 | GET | `/api/v1/recordings/:id` | Recording metadata |
 | GET | `/api/v1/recordings/:id/download` | 5-minute signed download link |
+| GET | `/api/v1/appointments` | List appointments, filtered by lead, agent, status, or date range |
+| POST | `/api/v1/appointments` | Book an appointment for a lead, optionally with a property |
+| PATCH | `/api/v1/appointments/:id` | Change status (Scheduled, Completed, Cancelled, No Show), time, location or notes |
+| GET | `/api/v1/properties` | Browse property listings |
+| POST | `/api/v1/properties` | Add a listing (admin only) |
+| PATCH | `/api/v1/properties/:id` | Update a listing (admin only) |
 | GET | `/api/v1/tasks` | List tasks by bucket (overdue, today, upcoming), status, lead or assignee |
 | GET | `/api/v1/tasks/summary` | Counts of overdue, due-today and due-in-7-days tasks for the dashboard |
 | POST | `/api/v1/tasks` | Create a follow-up task, optionally linked to a lead |

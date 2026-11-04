@@ -15,6 +15,7 @@ import { AuthService } from '../../core/auth.service';
 import { Call, CallPage, ImportSummary } from '../../core/call.models';
 import { CallService } from '../../core/call.service';
 import { CallLogDialogComponent, CallLogDialogData } from './call-log-dialog.component';
+import { RecordingDialogComponent, RecordingDialogData } from './recording-dialog.component';
 
 @Component({
   selector: 'app-call-list',
@@ -86,6 +87,16 @@ export class CallListComponent implements OnInit {
 
   leadId(call: Call): string {
     return typeof call.lead === 'string' ? call.lead : call.lead.id;
+  }
+
+  uploadRecording(call: Call): void {
+    const data: RecordingDialogData = { callId: call.id, leadName: this.leadName(call) || call.phone };
+    this.dialog
+      .open(RecordingDialogComponent, { data, width: '520px' })
+      .afterClosed()
+      .subscribe((saved) => {
+        if (saved) this.snack.open('Recording uploaded', 'Close', { duration: 2500 });
+      });
   }
 
   logOutcome(call: Call): void {
