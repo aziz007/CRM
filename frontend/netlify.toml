@@ -1,0 +1,9 @@
+[build]
+  command = "npm run build"
+  publish = "dist/frontend/browser"
+
+# Send every route to the app so refreshing a page like /leads/123 works.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

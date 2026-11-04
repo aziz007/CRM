@@ -41,6 +41,23 @@ Storage keys are generated on the server, so uploaded file names cannot change w
 
 Browsers upload directly to B2, so the bucket needs a CORS rule. In the bucket settings, allow the app's origin (for example `http://localhost:4200` and your deployed site) with the `PUT`, `GET` and `HEAD` operations and all headers.
 
+## Deployment (free to start)
+
+Recommended setup: MongoDB Atlas (free cluster) for the database, Render (free web service) for the API, and Netlify (free) for the frontend.
+
+Note: Render's free web service sleeps after 15 minutes without traffic. The first request after a sleep takes about a minute. This is fine for testing and a small pilot. Upgrade the API service when agents depend on it during the day.
+
+1. **MongoDB Atlas:** create a free M0 cluster, add a database user, and copy the connection string. Under Network Access, allow connections from anywhere for now, and tighten this later.
+2. **API on Render:** New, Web Service, connect the GitHub repo.
+   - Root directory: `backend`
+   - Build command: `npm install`
+   - Start command: `npm start`
+   - Health check path: `/health`
+   - Environment variables: the values from `backend/.env`, plus `NODE_ENV=production` and `CORS_ORIGIN=https://<your-netlify-site>.netlify.app`
+3. **Create the first admin** from your computer, using the production `MONGODB_URI`: run `ADMIN_EMAIL=... ADMIN_PASSWORD=... ADMIN_NAME=... ADMIN_COUNTRY=AE node src/utils/createAdmin.js` inside `backend`.
+4. **Frontend on Netlify:** set the API address in `frontend/src/environments/environment.production.ts` to `https://<your-render-service>.onrender.com/api/v1`, commit it, then on Netlify choose New site from Git. The base directory is `frontend`. Netlify reads `netlify.toml` for the build settings.
+5. **Backblaze:** add the Netlify site address to the bucket's CORS rule, as described in the Call recordings section.
+
 ## Follow-ups
 
 Tasks have a due date and time, an optional lead, and an assignee. The dashboard shows overdue and due-today counts. Due dates are computed in the user's own timezone, so "today" matches the clock on their device. Completing a lead's task is recorded in the lead's activity history.
